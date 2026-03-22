@@ -13,6 +13,7 @@ client_scripts {
     'client/esx.lua',
     'client/main.lua',
     'client/radar.lua',
+    'client/stealth.lua',
     'client/crouch.lua',
     'client/player_props.lua',
     'client/combat.lua',
