@@ -1,35 +1,8 @@
 local PlayerPedId = PlayerPedId
 
-State = {
-    crouched = false,
-    pointing = false,
-    handsup = false
-}
-
-function SafeReset()
-    local ped = PlayerPedId()
-
-    if State.crouched then
-        ResetPedMovementClipset(ped, 0)
-        State.crouched = false
-    end
-
-    if State.pointing then
-        ClearPedSecondaryTask(ped)
-        SetPedCurrentWeaponVisible(ped, true, true, true, true)
-        SetPedConfigFlag(ped, 36, false)
-        State.pointing = false
-    end
-
-    if State.handsup then
-        ClearPedTasks(ped)
-        State.handsup = false
-    end
-end
-
 AddEventHandler('onResourceStop', function(res)
     if res == GetCurrentResourceName() then
-        SafeReset()
+        SSRCore.resetPlayerState()
         DisplayRadar(false)
     end
 end)

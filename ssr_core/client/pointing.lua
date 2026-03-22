@@ -1,3 +1,5 @@
+local state = SSRCore.getState()
+
 local function startPointing()
     local ped = PlayerPedId()
 
@@ -18,19 +20,19 @@ local function stopPointing()
     SetPedCurrentWeaponVisible(ped, true, true, true, true)
     SetPedConfigFlag(ped, 36, false)
 
-    State.pointing = false
+    state.pointing = false
 end
 
 RegisterCommand("Pointing", function()
     local ped = PlayerPedId()
     if IsPedInAnyVehicle(ped, false) then return end
 
-    if State.pointing then
+    if state.pointing then
         stopPointing()
         return
     end
 
-    State.pointing = true
+    state.pointing = true
     startPointing()
 
     CreateThread(function()
@@ -38,8 +40,9 @@ RegisterCommand("Pointing", function()
         local smoothHeading = 0.5
         local rayTimer = 0
 
-        while State.pointing do
+        while state.pointing do
             Wait(16)
+            ped = PlayerPedId()
 
             if not IsPedOnFoot(ped) or IsPedInAnyVehicle(ped, false) then
                 stopPointing()
@@ -70,7 +73,7 @@ end)
 RegisterKeyMapping("Pointing", "Anim: Pointing", "keyboard", "B")
 
 AddEventHandler("ssr_core:vehicleStateChanged", function(inVehicle)
-    if inVehicle ~= true or not State.pointing then
+    if inVehicle ~= true or not state.pointing then
         return
     end
     stopPointing()

@@ -1,71 +1,60 @@
-local crouched = false
-RegisterCommand('crouched', function()
-    local ped = PlayerPedId()
-    if IsPedInAnyVehicle(ped, true) or IsEntityDead(ped) then return end
+local crouchAnimSet = "move_ped_crouched"
+local crouchThreadActive = false
+local state = SSRCore.getState()
 
-    if crouched then
-        ResetPedMovementClipset(ped, 0)
-        -- SetPedConfigFlag(ped, 36, 0)
-        -- SetPedCurrentWeaponVisible(ped, 1, 1, 1, 1)
-        crouched = false
+local function resetCrouch(ped)
+    ResetPedMovementClipset(ped, 0.25)
+    state.crouched = false
+end
+
+local function startCrouchThread()
+    if crouchThreadActive then
+        return
+    end
+
+    crouchThreadActive = true
+
+    CreateThread(function()
+        while state.crouched do
+            local ped = PlayerPedId()
+
+            if IsPedInAnyVehicle(ped, true) or IsEntityDead(ped) then
+                resetCrouch(ped)
+                break
+            end
+
+            Wait(0)
+        end
+
+        crouchThreadActive = false
+    end)
+end
+
+RegisterCommand('+crouched', function()
+    local ped = PlayerPedId()
+    if state.crouched or IsPedInAnyVehicle(ped, true) or IsEntityDead(ped) then
         return
     end
 
     SetCurrentPedWeapon(ped, GetHashKey("WEAPON_UNARMED"), true)
-    -- SetPedCurrentWeaponVisible(ped, 0, 1, 1, 1)
 
-    RequestAnimSet("move_ped_crouched")
-    while not HasAnimSetLoaded("move_ped_crouched") do Wait(0) end
-    SetPedMovementClipset(ped, "move_ped_crouched", 0.25)
-    -- SetPedConfigFlag(ped, 36, 1)
-    DisableControlAction( 0, 36, true )
-    DisableControlAction( 1, 36, true )
-    DisableControlAction( 2, 36, true )
+    RequestAnimSet(crouchAnimSet)
+    while not HasAnimSetLoaded(crouchAnimSet) do
+        Wait(0)
+    end
 
-    crouched = true
+    SetPedMovementClipset(ped, crouchAnimSet, 0.25)
+    state.crouched = true
+    startCrouchThread()
 end, false)
 
-RegisterKeyMapping('crouched', 'Anim: Crouched', 'keyboard', 'LCONTROL')
-
-
-Citizen.CreateThread(function() 
-	while true do 
-		Citizen.Wait(0) 
-		DisableControlAction(0, 36, true)
-	end 
-end)
-
--- ปิดแว่นตบ --
-Citizen.CreateThread(function()
-    while true do
-        SetPedCanLosePropsOnDamage(PlayerPedId(),false,0)
-        Citizen.Wait(1000)
+RegisterCommand('-crouched', function()
+    local ped = PlayerPedId()
+    if not state.crouched then
+        return
     end
-end)
 
--- ปิดระบบใส่หมวกอัตโนมัติเอง
-Citizen.CreateThread(function()
-    while true do
-        Citizen.Wait(1000)
-        local playerPed = PlayerPedId()
+    resetCrouch(ped)
+end, false)
 
-        SetPedHelmet(playerPed, false)
-        RemovePedHelmet(playerPed, true)
-    end
-end)
-
-
--- ปิดตบปืน --
-Citizen.CreateThread(function()
-    while true do
-        Citizen.Wait(7)
-        local ped = PlayerPedId()
-        if IsPedArmed(ped, 6) then
-            DisableControlAction(1, 140, true)
-            DisableControlAction(1, 141, true)
-            DisableControlAction(1, 142, true)
-            DisableControlAction(1, 263, true)
-            DisableControlAction(1, 264, true)
-        end
-    end
-end)
+RegisterKeyMapping('+crouched', 'Anim: Crouched', 'keyboard', 'LCONTROL')
