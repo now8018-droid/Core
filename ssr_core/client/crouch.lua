@@ -1,5 +1,4 @@
 local crouchAnimSet = "move_ped_crouched"
-local crouchControl = 36
 local crouchThreadActive = false
 local state = SSRCore.getState()
 
@@ -24,9 +23,6 @@ local function startCrouchThread()
                 break
             end
 
-            DisableControlAction(0, crouchControl, true)
-            DisableControlAction(1, crouchControl, true)
-            DisableControlAction(2, crouchControl, true)
             Wait(0)
         end
 

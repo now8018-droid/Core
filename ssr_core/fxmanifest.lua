@@ -16,7 +16,6 @@ client_scripts {
     'client/stealth.lua',
     'client/crouch.lua',
     'client/player_props.lua',
-    'client/combat.lua',
     'client/pointing.lua',
     'client/handsup.lua',
     'client/audio.lua',
